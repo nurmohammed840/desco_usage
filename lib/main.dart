@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'signal.dart';
+import 'app_state.dart';
 import 'dialogs/add_meter.dart';
 import 'screens/usage.dart';
 import 'screens/consumption.dart';
-import 'api/api.dart';
 
 import 'dart:io';
 
@@ -18,22 +17,8 @@ class MyHttpOverrides extends HttpOverrides {
 
 void main() {
   HttpOverrides.global = MyHttpOverrides();
+  AppInstance.init();
   runApp(const MyApp());
-}
-
-final selectedNav = CreateState(0);
-final isLoading = CreateState(0);
-
-Future<T?> loadData<T>(Future<T> Function() cb) async {
-  isLoading.set(isLoading.value + 1);
-  try {
-    return await cb();
-  } catch (err) {
-    // print(err);
-  } finally {
-    isLoading.set(isLoading.value - 1);
-  }
-  return null;
 }
 
 class MyApp extends StatelessWidget {
@@ -74,13 +59,11 @@ class MyApp extends StatelessWidget {
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     onTap: () async {
-                      final info = await acceptMeterInfo(context);
-                      if (info != null) {
-                        final data = await loadData(() => getBalance(info));
-                        if (data != null) {
-                          
-                        }
+                      final meterNo = await acceptMeterNo(context);
+                      if (meterNo == null) {
+                        return;
                       }
+                      addMeter(meterNo);
                     },
                     value: 'add_meter',
                     child: Row(
@@ -111,9 +94,10 @@ class MyApp extends StatelessWidget {
             selectedIndex: selectedNav.value,
             onDestinationSelected: (idx) => selectedNav.set(idx),
             destinations: const [
-              NavigationDestination(icon: Icon(Icons.home), label: 'Usage'),
               NavigationDestination(
-                icon: Icon(Icons.bolt),
+                icon: Icon(Icons.speed), label: 'Usage'),
+              NavigationDestination(
+                icon: Icon(Icons.timeline),
                 label: 'Consumption',
               ),
             ],

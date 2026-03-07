@@ -6,13 +6,33 @@ import 'date.dart';
 
 const apiUrl = "https://prepaid.desco.org.bd/api/unified/customer";
 
-class MeterInfo {
+class MeterNo {
   String? accountNo;
   String? meterNo;
 
-  MeterInfo({this.accountNo, this.meterNo});
-  MeterInfo.fromAccountNo(String account) : accountNo = account, meterNo = null;
-  MeterInfo.fromMeterNo(String meter) : meterNo = meter, accountNo = null;
+  MeterNo({this.accountNo, this.meterNo});
+  MeterNo.fromAccountNo(String account) : accountNo = account, meterNo = null;
+  MeterNo.fromMeterNo(String meter) : meterNo = meter, accountNo = null;
+
+  static MeterNo? from(String input) {
+    if (input.length == 8) {
+      return MeterNo.fromAccountNo(input);
+    }
+    if (input.length > 8) {
+      return MeterNo.fromMeterNo(input);
+    }
+    return null;
+  }
+
+  String accountOrMeterNumber() {
+    if (accountNo != null) {
+      return accountNo!;
+    }
+    if (meterNo != null) {
+      return meterNo!;
+    }
+    throw "unreachable";
+  }
 
   @override
   String toString() {
@@ -28,6 +48,7 @@ Future<T> fetchJson<T>(
   T Function(Map<String, dynamic>) fromJson,
 ) async {
   final res = await http.get(Uri.parse(url));
+  // print("$url: ${res.body}");
   if (res.statusCode == 200) {
     return fromJson(jsonDecode(res.body));
   } else {
@@ -35,13 +56,13 @@ Future<T> fetchJson<T>(
   }
 }
 
-Future<Response<Info>> getCustomerInfo(MeterInfo meterInfo) async {
+Future<Response<Info>> getCustomerInfo(MeterNo meterInfo) async {
   final url = "$apiUrl/getCustomerInfo?$meterInfo";
   return fetchJson(url, parseResponse(Info.fromJson));
 }
 
 Future<Response<List<DailyConsumption>>> getDailyConsumptions(
-  MeterInfo meterInfo,
+  MeterNo meterInfo,
   Date from,
   Date to,
 ) async {
@@ -51,14 +72,13 @@ Future<Response<List<DailyConsumption>>> getDailyConsumptions(
   return fetchJson(url, parseResponseMany(DailyConsumption.fromJson));
 }
 
-Future<Response<Balance>> getBalance(MeterInfo meterInfo) async {
+Future<Response<Balance>> getBalance(MeterNo meterInfo) async {
   final url = "$apiUrl/getBalance?$meterInfo";
-  print(url);
   return fetchJson(url, parseResponse(Balance.fromJson));
 }
 
 Future<Response<List<RechargeHistory>>> getRechargeHistorys(
-  MeterInfo meterInfo,
+  MeterNo meterInfo,
   Date from,
   Date to,
 ) async {
@@ -67,7 +87,7 @@ Future<Response<List<RechargeHistory>>> getRechargeHistorys(
 }
 
 Future<Response<List<MonthlyConsumption>>> getMonthlyConsumption(
-  MeterInfo meterInfo,
+  MeterNo meterInfo,
   Month from,
   Month to,
 ) async {

@@ -24,6 +24,10 @@ class CreateState<T> extends ChangeNotifier implements ValueListenable<T> {
   }
 
   void set(T value) {
+    if (_value == value) {
+      return;
+    }
+    
     _value = value;
     notifyListeners();
   }

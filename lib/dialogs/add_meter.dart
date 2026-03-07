@@ -54,20 +54,16 @@ Future<String?> showNumberInputDialog({
   );
 }
 
-Future<MeterInfo?> acceptMeterInfo(BuildContext context) async {
+Future<MeterNo?> acceptMeterNo(BuildContext context) async {
   final input = await showNumberInputDialog(
     context: context,
     title: 'Add Meter',
     hintText: 'Account or Meter number',
   );
 
-  if (input == null || input.isEmpty) {
+  if (input == null) {
     return null;
   }
 
-  if (input.length <= 8) {
-    return MeterInfo.fromAccountNo(input);
-  }
-
-  return MeterInfo.fromMeterNo(input);
+  return MeterNo.from(input);
 }

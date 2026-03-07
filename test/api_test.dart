@@ -1,7 +1,7 @@
 import "package:desco_usage/api/api.dart";
 
 Future<void> main() async {
-  final meterInfo = MeterInfo.fromAccountNo("41139960");
+  final meterInfo = MeterNo.fromAccountNo("41139960");
 
   // final res = await getCustomerInfo(meterInfo);
 

@@ -10,6 +10,10 @@ class Date {
 
   factory Date.now() => Date.from(DateTime.now());
 
+  DateTime time() {
+    return DateTime(year, month, day);
+  }
+
   @override
   String toString() {
     return "${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
