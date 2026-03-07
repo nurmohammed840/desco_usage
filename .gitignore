@@ -3,7 +3,6 @@
 *.log
 *.pyc
 *.swp
-.data
 .DS_Store
 .atom/
 .build/
@@ -32,6 +31,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/target
 /coverage/
 
 # Symbolication related

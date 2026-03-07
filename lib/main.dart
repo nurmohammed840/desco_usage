@@ -1,7 +1,39 @@
 import 'package:flutter/material.dart';
 
+import 'signal.dart';
+import 'dialogs/add_meter.dart';
+import 'screens/usage.dart';
+import 'screens/consumption.dart';
+import 'api/api.dart';
+
+import 'dart:io';
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (cert, host, port) => true; // bypass SSL check
+  }
+}
+
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
   runApp(const MyApp());
+}
+
+final selectedNav = CreateState(0);
+final isLoading = CreateState(0);
+
+Future<T?> loadData<T>(Future<T> Function() cb) async {
+  isLoading.set(isLoading.value + 1);
+  try {
+    return await cb();
+  } catch (err) {
+    // print(err);
+  } finally {
+    isLoading.set(isLoading.value - 1);
+  }
+  return null;
 }
 
 class MyApp extends StatelessWidget {
@@ -11,65 +43,83 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Desco Usage',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
+      home: selectedNav.watch((_) {
+        final body = [
+          const UsageScreen(),
+          const ConsumptionScreen(),
+        ][selectedNav.value];
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(body.title),
+            actions: [
+              isLoading.watch(
+                (_) => isLoading.value == 0
+                    ? const SizedBox.shrink()
+                    : const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(),
+                      ),
+              ),
+              PopupMenuButton(
+                position: .under,
+                icon: const Padding(
+                  padding: .symmetric(horizontal: 8),
+                  child: Icon(Icons.more_vert),
+                ),
+                onSelected: (value) {},
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    onTap: () async {
+                      final info = await acceptMeterInfo(context);
+                      if (info != null) {
+                        final data = await loadData(() => getBalance(info));
+                        if (data != null) {
+                          
+                        }
+                      }
+                    },
+                    value: 'add_meter',
+                    child: Row(
+                      children: [
+                        Icon(Icons.add),
+                        SizedBox(width: 8),
+                        Text('Add Meter'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'settings',
+                    child: Row(
+                      children: [
+                        Icon(Icons.settings),
+                        SizedBox(width: 8),
+                        Text('Settings'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          body: body,
+          bottomNavigationBar: NavigationBar(
+            labelBehavior: .alwaysHide,
+            selectedIndex: selectedNav.value,
+            onDestinationSelected: (idx) => selectedNav.set(idx),
+            destinations: const [
+              NavigationDestination(icon: Icon(Icons.home), label: 'Usage'),
+              NavigationDestination(
+                icon: Icon(Icons.bolt),
+                label: 'Consumption',
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
