@@ -1,7 +1,10 @@
-import 'package:desco_usage/api/api.dart';
-import 'package:desco_usage/api/customer.dart';
-import 'package:desco_usage/signal.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '/api/api.dart';
+import '/api/customer.dart';
+import '/colors.dart';
+import '/signal.dart';
 
 late final Future<AppInstance> _appInstance;
 
@@ -19,8 +22,9 @@ Future<T?> _loadData<T>(Future<T> Function() cb) async {
 
 class MeterInfo {
   Balance balance;
+  Color color;
 
-  MeterInfo({required this.balance});
+  MeterInfo({required this.balance, required this.color});
 }
 
 final selectedNav = CreateState(0);
@@ -43,7 +47,9 @@ void addMeter(MeterNo meterNo) async {
   }
 
   meterInfos.update((list) {
-    meterInfos.value.add(MeterInfo(balance: balance.data));
+    meterInfos.value.add(
+      MeterInfo(balance: balance.data, color: pickNextColor()),
+    );
   });
 
   AppInstance.get((app) {
@@ -78,7 +84,7 @@ class AppInstance {
       final data = balances
           .map((res) => res?.data)
           .whereType<Balance>()
-          .map((balance) => MeterInfo(balance: balance))
+          .map((balance) => MeterInfo(balance: balance, color: pickNextColor()))
           .toList();
 
       meterInfos.set(data);

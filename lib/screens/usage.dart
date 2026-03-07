@@ -29,6 +29,7 @@ class UsageScreen extends AppScreen {
         ),
         itemBuilder: (_, index) {
           final meter = meterInfos.value[index].balance;
+          final color = meterInfos.value[index].color;
 
           return ListTile(
             leading: const Icon(Icons.electric_meter),
@@ -53,7 +54,7 @@ class UsageScreen extends AppScreen {
               meter.balance.toStringAsFixed(2), // show balance on the right
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
             ),
-            iconColor: Colors.blue[700],
+            iconColor: color,
             onTap: () => {},
           );
         },
