@@ -1,17 +1,33 @@
-import 'package:desco_usage/app_state.dart';
-
-import 'package:desco_usage/components/balance_pie_chart.dart';
 import 'package:flutter/material.dart';
-import 'utils.dart';
 
-class ConsumptionScreen extends AppScreen {
+import '/app_state.dart';
+
+class ConsumptionScreen extends StatelessWidget {
   const ConsumptionScreen({super.key});
 
   @override
-  final title = "Daily Consumption";
-
-  @override
   Widget build(BuildContext context) {
-    return BalancePieChart(meters: meterInfos.value);
+    print("------------------");
+    return dailyConsumtions.watch(
+      (_) => FutureBuilder(
+        future: dailyConsumtions.value,
+        builder: (_, data) {
+          return Column(
+            children: [
+              ElevatedButton(
+                child: Text("Click"),
+                onPressed: () {
+                  final len = data.data?.length ?? 0;
+                  dailyConsumtions.set(
+                    Future.value(List.generate(len + 1, (_) => 42)),
+                  );
+                },
+              ),
+              Text("data ${data.data?.length}"),
+            ],
+          );
+        },
+      ),
+    );
   }
 }

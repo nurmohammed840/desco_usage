@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'utils.dart';
 
 import '/app_state.dart';
 import '/pages/details.dart';
 import '/components/balance_pie_chart.dart';
 import '/components/center_widget.dart';
 
-class UsageScreen extends AppScreen {
+class UsageScreen extends StatelessWidget {
   const UsageScreen({super.key});
-
-  @override
-  final title = "Usage";
 
   @override
   Widget build(BuildContext context) {

@@ -32,6 +32,8 @@ final isLoading = CreateState(0);
 
 CreateState<List<MeterInfo>> meterInfos = CreateState([]);
 
+CreateState<Future<List<int>>> dailyConsumtions = CreateState(Future.value([]));
+
 void addMeter(MeterNo meterNo) async {
   final balance = await _loadData(() => getBalance(meterNo));
 

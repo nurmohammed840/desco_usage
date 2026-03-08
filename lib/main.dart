@@ -16,6 +16,7 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
   AppInstance.init();
   runApp(const MyApp());
@@ -24,21 +25,18 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  static const screenTitles = ["Usage", "Daily Consumption"];
+  static const screens = [UsageScreen(), ConsumptionScreen()];
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Desco Usage',
       debugShowCheckedModeBanner: false,
       home: selectedNav.watch((_) {
-        final body = [
-          const UsageScreen(),
-          const ConsumptionScreen(),
-        ][selectedNav.value];
-
         return Scaffold(
           appBar: AppBar(
-            title: Text(body.title),
+            title: Text(MyApp.screenTitles[selectedNav.value]),
             actions: [
               isLoading.watch(
                 (_) => isLoading.value == 0
@@ -88,7 +86,7 @@ class MyApp extends StatelessWidget {
               ),
             ],
           ),
-          body: body,
+          body: IndexedStack(index: selectedNav.value, children: MyApp.screens),
           bottomNavigationBar: NavigationBar(
             labelBehavior: .alwaysHide,
             selectedIndex: selectedNav.value,
