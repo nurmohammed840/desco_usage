@@ -1,3 +1,4 @@
+import 'package:desco_usage/components/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -11,37 +12,40 @@ class UsageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return meterInfos.watch((_) {
-      if (meterInfos.value.isEmpty) {
-        return const CenterWidget(
-          iconData: Icons.electric_meter_outlined,
-          header: "No Meter Found",
-          msg: "",
+    return Scaffold(
+      appBar: appBar("Usage"),
+      body: meterInfos.watch((_) {
+        if (meterInfos.value.isEmpty) {
+          return const CenterWidget(
+            iconData: Icons.electric_meter_outlined,
+            header: "No Meter Found",
+            msg: "",
+          );
+        }
+
+        if (meterInfos.value.length == 1) {
+          return ListView(children: [MeterList(meter: meterInfos.value[0])]);
+        }
+
+        return ListView.separated(
+          itemCount: meterInfos.value.length + 1,
+          separatorBuilder: (_, index) => index == 0
+              ? const SizedBox.shrink()
+              : const Padding(
+                  padding: .symmetric(horizontal: 16.0),
+                  child: Divider(color: Colors.grey, thickness: 0.5),
+                ),
+          itemBuilder: (_, index) {
+            if (index == 0) {
+              return BalancePieChart(meters: meterInfos.value);
+            }
+            index -= 1;
+
+            return MeterList(meter: meterInfos.value[index]);
+          },
         );
-      }
-
-      if (meterInfos.value.length == 1) {
-        return ListView(children: [MeterList(meter: meterInfos.value[0])]);
-      }
-
-      return ListView.separated(
-        itemCount: meterInfos.value.length + 1,
-        separatorBuilder: (_, index) => index == 0
-            ? const SizedBox.shrink()
-            : const Padding(
-                padding: .symmetric(horizontal: 16.0),
-                child: Divider(color: Colors.grey, thickness: 0.5),
-              ),
-        itemBuilder: (_, index) {
-          if (index == 0) {
-            return BalancePieChart(meters: meterInfos.value);
-          }
-          index -= 1;
-
-          return MeterList(meter: meterInfos.value[index]);
-        },
-      );
-    });
+      }),
+    );
   }
 }
 

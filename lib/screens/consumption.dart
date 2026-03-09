@@ -1,3 +1,4 @@
+import 'package:desco_usage/components/app_bar.dart';
 import 'package:flutter/material.dart';
 
 import '/app_state.dart';
@@ -8,25 +9,28 @@ class ConsumptionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print("------------------");
-    return dailyConsumtions.watch(
-      (_) => FutureBuilder(
-        future: dailyConsumtions.value,
-        builder: (_, data) {
-          return Column(
-            children: [
-              ElevatedButton(
-                child: Text("Click"),
-                onPressed: () {
-                  final len = data.data?.length ?? 0;
-                  dailyConsumtions.set(
-                    Future.value(List.generate(len + 1, (_) => 42)),
-                  );
-                },
-              ),
-              Text("data ${data.data?.length}"),
-            ],
-          );
-        },
+    return Scaffold(
+      appBar: appBar("Daily Consumption"),
+      body: dailyConsumtions.watch(
+        (_) => FutureBuilder(
+          future: dailyConsumtions.value,
+          builder: (_, data) {
+            return Column(
+              children: [
+                ElevatedButton(
+                  child: Text("Click"),
+                  onPressed: () {
+                    final len = data.data?.length ?? 0;
+                    dailyConsumtions.set(
+                      Future.value(List.generate(len + 1, (_) => 42)),
+                    );
+                  },
+                ),
+                Text("data ${data.data?.length}"),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
