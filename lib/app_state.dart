@@ -54,6 +54,17 @@ void addMeter(MeterNo meterNo) async {
     );
   });
 
+  _saveMeters();
+}
+
+void removeMeter(MeterInfo meter) {
+  meterInfos.update((list) {
+    list.remove(meter);
+  });
+  _saveMeters();
+}
+
+void _saveMeters() {
   AppInstance.get((app) {
     app.sharedPreferences.setStringList(
       "meters",

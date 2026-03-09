@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 
 import '/app_state.dart';
+import '/components/optional.dart';
 import '/dialogs/add_meter.dart';
 
 AppBar appBar(String title) => AppBar(
   title: Text(title),
   actions: [
     isLoading.watch(
-      (_) => isLoading.value == 0
-          ? const SizedBox.shrink()
-          : const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(),
-            ),
+      (_) => Optional(
+        condition: isLoading.value > 0,
+        child: const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(),
+        ),
+      ),
     ),
+
     PopupMenuButton(
       position: .under,
       icon: const Padding(

@@ -32,6 +32,10 @@ class MyApp extends StatelessWidget {
       title: 'Desco Usage',
       debugShowCheckedModeBanner: false,
       home: selectedNav.watch((_) {
+        if (selectedNav.value == 1) {
+          ConsumptionScreen.loadData();
+        }
+
         return Scaffold(
           body: IndexedStack(index: selectedNav.value, children: MyApp.screens),
           bottomNavigationBar: NavigationBar(

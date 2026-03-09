@@ -1,14 +1,22 @@
+import 'package:desco_usage/utils.dart';
 import 'package:desco_usage/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 
 import '/app_state.dart';
 
+final _once = OnceInit();
+
 class ConsumptionScreen extends StatelessWidget {
   const ConsumptionScreen({super.key});
 
+  static void loadData() {
+    _once.callAsync(() async {
+      print("===========================");
+    });
+  }
+
   @override
   Widget build(BuildContext _) {
-    print("------------------");
     return Scaffold(
       appBar: appBar("Daily Consumption"),
       body: dailyConsumtions.watch(
