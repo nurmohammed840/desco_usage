@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'app_state.dart';
 import 'screens/usage.dart';
-import 'screens/consumption.dart';
+import 'screens/recharge_history.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -41,12 +41,12 @@ class MyApp extends StatelessWidget {
 class HomeWidget extends StatelessWidget {
   const HomeWidget({super.key});
 
-  static const screens = [UsageScreen(), ConsumptionScreen()];
+  static const screens = [UsageScreen(), RechargeHistoryScreen()];
   static const destinations = [
     NavigationDestination(icon: Icon(Icons.speed), label: 'Usage'),
     NavigationDestination(
-      icon: Icon(Icons.timeline),
-      label: 'Daily Consumption',
+      icon: Icon(Icons.receipt_long),
+      label: 'Recharge History',
     ),
   ];
 
@@ -54,7 +54,7 @@ class HomeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return selectedNav.watch((_) {
       if (selectedNav.value == 1) {
-        ConsumptionScreen.loadData();
+        RechargeHistoryScreen.loadData();
       }
       return Scaffold(
         body: IndexedStack(index: selectedNav.value, children: screens),

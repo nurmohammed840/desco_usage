@@ -128,29 +128,32 @@ class Info {
 
 class DailyConsumption {
   String accountNo;
+  String meterNo;
+
   double consumedTaka;
   double consumedUnit;
-  String customerName;
-  dynamic importReactiveEnergyIncrement;
-  String installationAddress;
-  String meterNo;
+
   Date date;
-  String phaseType;
   int sanctionLoad;
   String tariffSolution;
+
+  String? phaseType;
+  String? customerName;
+  dynamic importReactiveEnergyIncrement;
+  String? installationAddress;
 
   DailyConsumption({
     required this.accountNo,
     required this.consumedTaka,
     required this.consumedUnit,
-    required this.customerName,
-    required this.importReactiveEnergyIncrement,
-    required this.installationAddress,
     required this.meterNo,
     required this.date,
-    required this.phaseType,
     required this.sanctionLoad,
     required this.tariffSolution,
+    this.installationAddress,
+    this.phaseType,
+    this.customerName,
+    this.importReactiveEnergyIncrement,
   });
 
   factory DailyConsumption.fromJson(Map<String, dynamic> json) =>

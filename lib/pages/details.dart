@@ -1,6 +1,6 @@
 import 'package:desco_usage/app_state.dart';
+import 'package:desco_usage/widgets/table_data.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class MeterDetailsPage extends StatelessWidget {
   const MeterDetailsPage({super.key, required this.meter});
@@ -30,9 +30,7 @@ class MeterDetailsPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Table(
-            border: .all(color: Colors.grey),
-            columnWidths: const {0: FlexColumnWidth(4), 1: FlexColumnWidth(6)},
+          DataTableWidget(
             children: [
               tableRow("Account No", balance.accountNo),
               tableRow("Meter No", balance.meterNo),
@@ -41,37 +39,11 @@ class MeterDetailsPage extends StatelessWidget {
                 "Month Consumption",
                 "${balance.currentMonthConsumption.toStringAsFixed(2)} kWh",
               ),
-              tableRow(
-                "Reading Time",
-                DateFormat('MMMM d').format(balance.readingTime.time()),
-              ),
-              // tableRow("Customer Name", meter.customerName),
-              // tableRow("Tariff", meter.tariffSolution),
-              // tableRow("Contact No", meter.contactNo),
-              // tableRow("Feeder Name", meter.feederName),
-              // tableRow("Installation Address", meter.installationAddress),
-              // tableRow("Installation Date", meter.installationDate?.toString()),
-              // tableRow("Phase Type", meter.phaseType),
-              // tableRow("Sanction Load", meter.sanctionLoad?.toString()),
-              // tableRow("Meter Model", meter.meterModel),
-              // tableRow("Transformer", meter.transformer),
-              // tableRow("SD Name", meter.sdName),
+              tableRow("Reading Time", meter.formattedDate),
             ],
           ),
         ],
       ),
-    );
-  }
-
-  TableRow tableRow(String title, String? value) {
-    return TableRow(
-      children: [
-        Padding(
-          padding: const .all(8),
-          child: Text(title, style: const TextStyle(fontWeight: .bold)),
-        ),
-        Padding(padding: const .all(8), child: Text(value ?? "-")),
-      ],
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:desco_usage/components/optional.dart';
 import 'package:desco_usage/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '/app_state.dart';
 import '/pages/details.dart';
@@ -59,6 +58,7 @@ class MeterList extends StatelessWidget {
     final balance = meter.balance;
     return ListTile(
       leading: const Icon(Icons.electric_meter),
+      iconColor: meter.color,
       title: Text(
         balance.accountNo,
         style: const TextStyle(
@@ -70,14 +70,13 @@ class MeterList extends StatelessWidget {
         children: [
           Text("# ${balance.meterNo}"),
           Text("${balance.currentMonthConsumption.toStringAsFixed(2)} kWh"),
-          Text(DateFormat('MMMM d').format(balance.readingTime.time())),
+          Text(meter.formattedDate),
         ],
       ),
       trailing: Text(
         balance.balance.toStringAsFixed(2), // show balance on the right
         style: const TextStyle(fontWeight: .bold, fontSize: 22),
       ),
-      iconColor: meter.color,
       onTap: () {
         Navigator.push(
           context,

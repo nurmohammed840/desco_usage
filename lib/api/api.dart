@@ -48,7 +48,10 @@ Future<T> fetchJson<T>(
   T Function(Map<String, dynamic>) fromJson,
 ) async {
   final res = await http.get(Uri.parse(url));
-  // print("$url: ${res.body}");
+  
+  // print(url);
+  // print(res.body);
+
   if (res.statusCode == 200) {
     return fromJson(jsonDecode(res.body));
   } else {

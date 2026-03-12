@@ -1,5 +1,7 @@
+import 'package:desco_usage/api/date.dart';
 import 'package:desco_usage/components/error_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/api/api.dart';
@@ -21,11 +23,24 @@ Future<T?> _loadData<T>(Future<T> Function() cb) async {
   return null;
 }
 
-class MeterInfo {
-  Balance balance;
-  Color color;
+class MeterRechargeHistory {
+  MeterRechargeHistory({required this.info, required this.history})
+    : formattedDate = DateFormat(
+        'd MMM yyyy, h:mm a',
+      ).format(history.rechargeDate);
 
-  MeterInfo({required this.balance, required this.color});
+  final MeterInfo info;
+  final RechargeHistory history;
+  final String formattedDate;
+}
+
+class MeterInfo {
+  MeterInfo({required this.balance, required this.color})
+    : formattedDate = DateFormat('MMMM d').format(balance.readingTime.time());
+
+  final Balance balance;
+  final Color color;
+  final String formattedDate;
 
   MeterNo meterNo() => MeterNo.fromMeterNo(balance.meterNo);
 }
@@ -35,17 +50,52 @@ final isLoading = CreateState(0);
 
 CreateState<List<MeterInfo>> meterInfos = CreateState([]);
 
-CreateState<Future<List<int>>> dailyConsumtions = CreateState(Future.value([]));
+CreateState<Future<List<MeterRechargeHistory>>> rechargeHistorys = CreateState(
+  Future.value([]),
+);
 
-Future<void> loadDailyConsumtions(Duration duration) async {
-  // final today = Date.now();
-  // final to = Date.from(today.time().subtract(duration));
+void loadRechargeHistorys(Duration duration) async {
+  Future<List<MeterRechargeHistory>> load() async {
+    try {
+      return await fetchRechargeHistorys(duration);
+    } catch (e) {
+      return [];
+    }
+  }
 
-  // final a = await Future.wait(
-  //   meterInfos.value.map((info) async {
-  //     final response = await getDailyConsumptions(info.meterNo(), today, to);
-  //   }),
-  // );
+  rechargeHistorys.set(load());
+}
+
+Future<List<MeterRechargeHistory>> fetchRechargeHistorys(
+  Duration duration,
+) async {
+  final today = Date.now();
+  final from = Date.from(today.time().subtract(duration));
+
+  final responses = await Future.wait(
+    meterInfos.value.map((info) async {
+      try {
+        final list = await getRechargeHistorys(info.meterNo(), from, today);
+        if (list.data == null) return null;
+
+        final result = list.data!
+            .map(
+              (history) => MeterRechargeHistory(history: history, info: info),
+            )
+            .toList();
+
+        return result;
+      } catch (e) {
+        // print(e);
+        return null;
+      }
+    }),
+  );
+
+  return responses
+      .whereType<List<MeterRechargeHistory>>()
+      .expand((e) => e)
+      .toList();
 }
 
 void addMeter(MeterNo meterNo, BuildContext context) async {
