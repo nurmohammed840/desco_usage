@@ -27,11 +27,11 @@ Response<List<T>> Function(Map<String, dynamic>) parseResponseMany<T>(
 }
 
 class Response<T> {
+  Response({required this.code, required this.desc, this.data});
+
   final int code;
   final String desc;
   final T? data;
-
-  Response({required this.code, required this.desc, this.data});
 
   Map<String, dynamic> toJson(Object Function(T value) toJsonT) {
     return {
@@ -41,11 +41,11 @@ class Response<T> {
     };
   }
 
-  String? errorMessage() {
+  T getData() {
     if (data == null) {
-      return desc;
+      throw desc;
     }
-    return null;
+    return data!;
   }
 
   @override
@@ -53,22 +53,6 @@ class Response<T> {
 }
 
 class Info {
-  String? meterNo;
-  String? customerName;
-  String? tariffSolution;
-
-  String? accountNo;
-  String? contactNo;
-  String? feederName;
-  String? installationAddress;
-  Date? installationDate;
-  String? phaseType;
-  dynamic registerDate;
-  int? sanctionLoad;
-  String? meterModel;
-  String? transformer;
-  String? sdName;
-
   Info({
     this.accountNo,
     this.contactNo,
@@ -103,6 +87,22 @@ class Info {
     sdName: json["SDName"],
   );
 
+  String? meterNo;
+  String? customerName;
+  String? tariffSolution;
+
+  String? accountNo;
+  String? contactNo;
+  String? feederName;
+  String? installationAddress;
+  Date? installationDate;
+  String? phaseType;
+  dynamic registerDate;
+  int? sanctionLoad;
+  String? meterModel;
+  String? transformer;
+  String? sdName;
+
   Map<String, dynamic> toJson() => {
     "accountNo": accountNo,
     "contactNo": contactNo,
@@ -127,21 +127,6 @@ class Info {
 }
 
 class DailyConsumption {
-  String accountNo;
-  String meterNo;
-
-  double consumedTaka;
-  double consumedUnit;
-
-  Date date;
-  int sanctionLoad;
-  String tariffSolution;
-
-  String? phaseType;
-  String? customerName;
-  dynamic importReactiveEnergyIncrement;
-  String? installationAddress;
-
   DailyConsumption({
     required this.accountNo,
     required this.consumedTaka,
@@ -171,6 +156,21 @@ class DailyConsumption {
         tariffSolution: json["tariffSolution"],
       );
 
+  String accountNo;
+  String meterNo;
+
+  double consumedTaka;
+  double consumedUnit;
+
+  Date date;
+  int sanctionLoad;
+  String tariffSolution;
+
+  String? phaseType;
+  String? customerName;
+  dynamic importReactiveEnergyIncrement;
+  String? installationAddress;
+
   Map<String, dynamic> toJson() => {
     "accountNo": accountNo,
     "consumedTaka": consumedTaka,
@@ -192,19 +192,6 @@ class DailyConsumption {
 }
 
 class MonthlyConsumption {
-  String accountNo;
-  String meterNo;
-  double consumedTaka;
-  double consumedUnit;
-  String customerName;
-  String installationAddress;
-  String phaseType;
-  int sanctionLoad;
-  double maximumDemand;
-  String tariffSolution;
-  String month;
-  double apf;
-
   MonthlyConsumption({
     required this.accountNo,
     required this.meterNo,
@@ -236,6 +223,19 @@ class MonthlyConsumption {
         apf: json["APF"],
       );
 
+  String accountNo;
+  String meterNo;
+  double consumedTaka;
+  double consumedUnit;
+  String customerName;
+  String installationAddress;
+  String phaseType;
+  int sanctionLoad;
+  double maximumDemand;
+  String tariffSolution;
+  String month;
+  double apf;
+
   Map<String, dynamic> toJson() => {
     "accountNo": accountNo,
     "meterNo": meterNo,
@@ -258,12 +258,6 @@ class MonthlyConsumption {
 }
 
 class Balance {
-  String accountNo;
-  String meterNo;
-  double balance;
-  double currentMonthConsumption;
-  Date readingTime;
-
   Balance({
     required this.accountNo,
     required this.meterNo,
@@ -280,6 +274,12 @@ class Balance {
     readingTime: Date.from(DateTime.parse(json["readingTime"])),
   );
 
+  String accountNo;
+  String meterNo;
+  double balance;
+  double currentMonthConsumption;
+  Date readingTime;
+
   Map<String, dynamic> toJson() => {
     "accountNo": accountNo,
     "meterNo": meterNo,
@@ -295,21 +295,6 @@ class Balance {
 }
 
 class RechargeHistory {
-  String accountNo;
-  String meterNo;
-  String orderId;
-  String token;
-  String sequence;
-  double totalAmount;
-  double energyAmount;
-  double chargeAmount;
-  DateTime rechargeDate;
-  String rechargeOperator;
-  double rebate;
-  List<ChargeItem> chargeItems;
-  String orderStatus;
-  double vat;
-
   RechargeHistory({
     required this.accountNo,
     required this.meterNo,
@@ -347,6 +332,21 @@ class RechargeHistory {
         vat: json["VAT"]?.toDouble(),
       );
 
+  String accountNo;
+  String meterNo;
+  String orderId;
+  String token;
+  String sequence;
+  double totalAmount;
+  double energyAmount;
+  double chargeAmount;
+  DateTime rechargeDate;
+  String rechargeOperator;
+  double rebate;
+  List<ChargeItem> chargeItems;
+  String orderStatus;
+  double vat;
+
   Map<String, dynamic> toJson() => {
     "accountNo": accountNo,
     "meterNo": meterNo,
@@ -371,15 +371,14 @@ class RechargeHistory {
 }
 
 class ChargeItem {
-  String chargeItemName;
-  double chargeAmount;
-
   ChargeItem({required this.chargeItemName, required this.chargeAmount});
 
   factory ChargeItem.fromJson(Map<String, dynamic> json) => ChargeItem(
     chargeItemName: json["chargeItemName"],
     chargeAmount: json["chargeAmount"],
   );
+  String chargeItemName;
+  double chargeAmount;
 
   Map<String, dynamic> toJson() => {
     "chargeItemName": chargeItemName,

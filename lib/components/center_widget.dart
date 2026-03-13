@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class CenterWidget extends StatelessWidget {
-  final IconData iconData;
-  final String header;
-  final String msg;
-
   const CenterWidget({
     super.key,
     required this.iconData,
     required this.header,
     required this.msg,
   });
+  
+  final IconData iconData;
+  final String header;
+  final String msg;
 
   @override
   Widget build(_) {

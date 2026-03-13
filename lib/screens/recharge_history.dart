@@ -11,7 +11,7 @@ class RechargeHistoryScreen extends StatelessWidget {
   const RechargeHistoryScreen({super.key});
 
   static void onFocus() {
-      loadRechargeHistorys(Duration(days: 90));
+    loadRechargeHistorys(const Duration(days: 90));
     _once.callAsync(() async {
     });
   }
@@ -25,7 +25,7 @@ class RechargeHistoryScreen extends StatelessWidget {
           future: rechargeHistorys.value,
           builder: (_, snapshot) {
             if (snapshot.connectionState == .waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
             final data = snapshot.data!;
             return ListView.separated(

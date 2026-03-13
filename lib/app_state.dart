@@ -44,6 +44,13 @@ class MeterInfo {
   final Color color;
   final String formattedDate;
 
+  late final info = customerInfo();
+
+  Future<Info> customerInfo() async {
+    final res = await getCustomerInfo(meterNo());
+    return res.getData();
+  }
+
   MeterNo meterNo() => MeterNo.fromMeterNo(balance.meterNo);
 }
 

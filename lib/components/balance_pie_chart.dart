@@ -3,16 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class Meter {
+  const Meter({required this.meterNo, required this.balance});
+
   final String meterNo;
   final double balance;
-
-  Meter({required this.meterNo, required this.balance});
 }
 
 class BalancePieChart extends StatelessWidget {
-  final List<MeterInfo> meters;
-
   const BalancePieChart({super.key, required this.meters});
+  final List<MeterInfo> meters;
 
   @override
   Widget build(BuildContext context) {

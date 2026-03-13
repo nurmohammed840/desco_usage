@@ -1,14 +1,13 @@
 class Date {
-  int year;
-  int month;
-  int day;
-
   Date({required this.year, required this.month, required this.day});
 
   factory Date.from(DateTime time) =>
       Date(year: time.year, month: time.month, day: time.day);
 
   factory Date.now() => Date.from(DateTime.now());
+  int year;
+  int month;
+  int day;
 
   DateTime time() {
     return DateTime(year, month, day);
@@ -21,15 +20,14 @@ class Date {
 }
 
 class Month {
-  int year;
-  int month;
-
   Month({required this.year, required this.month});
 
   factory Month.from(DateTime time) =>
       Month(year: time.year, month: time.month);
 
   factory Month.now() => Month.from(DateTime.now());
+  int year;
+  int month;
 
   @override
   String toString() =>

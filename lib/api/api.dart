@@ -7,12 +7,12 @@ import 'date.dart';
 const apiUrl = "https://prepaid.desco.org.bd/api/unified/customer";
 
 class MeterNo {
-  String? accountNo;
-  String? meterNo;
-
   MeterNo({this.accountNo, this.meterNo});
   MeterNo.fromAccountNo(String account) : accountNo = account, meterNo = null;
   MeterNo.fromMeterNo(String meter) : meterNo = meter, accountNo = null;
+
+  String? accountNo;
+  String? meterNo;
 
   static MeterNo? from(String input) {
     if (input.length == 8) {
@@ -48,7 +48,7 @@ Future<T> fetchJson<T>(
   T Function(Map<String, dynamic>) fromJson,
 ) async {
   final res = await http.get(Uri.parse(url));
-  
+
   // print(url);
   // print(res.body);
 

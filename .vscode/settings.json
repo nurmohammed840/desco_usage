@@ -1,0 +1,18 @@
+{
+    "dart.previewFlutterUiGuides": true,
+    "dart.previewFlutterUiGuidesCustomTracking": true,
+    "files.exclude": {
+        "**/.dart_tool": true,
+        "**/.idea": true,
+        "**/.metadata": true,
+        "**/pubspec.lock": true,
+        "**/.flutter-plugins-dependencies": true,
+        "**/build": true,
+        "**/android": true,
+        "**/ios": true,
+        "**/linux": true,
+        "**/macos": true,
+        "**/web": true,
+        "**/windows": true,
+    }
+}
