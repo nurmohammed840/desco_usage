@@ -1,24 +1,14 @@
 import 'package:desco_usage/pages/settings.dart';
+import 'package:desco_usage/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 
 import '/app_state.dart';
-import '/components/optional.dart';
 import '/dialogs/add_meter.dart';
 
 AppBar appBar(String title) => AppBar(
   title: Text(title),
   actions: [
-    isLoading.watch(
-      (_) => Optional(
-        condition: isLoading.value > 0,
-        child: const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(),
-        ),
-      ),
-    ),
-
+    const LoadingIndicatorWidget(),
     PopupMenuButton(
       position: .under,
       icon: const Padding(

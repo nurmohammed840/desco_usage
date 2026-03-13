@@ -1,25 +1,14 @@
-import 'package:desco_usage/api/date.dart';
-import 'package:desco_usage/components/error_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '/components/error_snackbar.dart';
+import '/widgets/loading_indicator.dart';
+import '/api/date.dart';
 import '/api/api.dart';
 import '/api/customer.dart';
 import '/colors.dart';
 import '/signal.dart';
-
-Future<T?> _loadData<T>(Future<T> Function() cb) async {
-  isLoading.set(isLoading.value + 1);
-  try {
-    return await cb();
-  } catch (err) {
-    // print(err);
-  } finally {
-    isLoading.set(isLoading.value - 1);
-  }
-  return null;
-}
 
 final dateFormatter = DateFormat('d MMM yyyy, h:mm a');
 final dateFormatterAlt = DateFormat('MMMM d');
@@ -55,7 +44,6 @@ class MeterInfo {
 }
 
 final selectedNav = CreateState(0);
-final isLoading = CreateState(0);
 
 CreateState<List<MeterInfo>> meterInfos = CreateState([]);
 
@@ -108,11 +96,7 @@ Future<List<MeterRechargeHistory>> fetchRechargeHistorys(
 }
 
 void addMeter(MeterNo meterNo, BuildContext context) async {
-  final balance = await _loadData(() => getBalance(meterNo));
-
-  if (balance == null) {
-    return; // unknown error
-  }
+  final balance = await showLoadingIndicator(() => getBalance(meterNo));
 
   if (!context.mounted) {
     return;
@@ -171,12 +155,12 @@ class AppInstance {
     final getBalances = meters
         .map(MeterNo.from)
         .whereType<MeterNo>()
-        .map((meterNo) => _loadData(() => getBalance(meterNo)));
+        .map((meterNo) => showLoadingIndicator(() => getBalance(meterNo)));
 
     final balances = await Future.wait(getBalances);
 
     final data = balances
-        .map((res) => res?.data)
+        .map((res) => res.data)
         .whereType<Balance>()
         .map((b) => MeterInfo(balance: b, color: colorPicker.next()))
         .toList();
