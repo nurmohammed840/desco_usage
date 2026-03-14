@@ -43,7 +43,9 @@ class MeterInfo {
       cacheKey.customarInfoCKey(),
       Info.fromJson,
       () async {
-        final res = await getCustomerInfo(meterNo());
+        final res = await showLoadingIndicator(
+          () => getCustomerInfo(meterNo()),
+        );
         return res.getData();
       },
     );

@@ -54,22 +54,3 @@ class RechargeReceiptPage extends StatelessWidget {
     );
   }
 }
-
-class TableHeader extends StatelessWidget {
-  const TableHeader({super.key, required this.header});
-
-  final String header;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const .symmetric(vertical: 8),
-        child: Text(
-          header,
-          style: const TextStyle(fontSize: 16, fontWeight: .bold),
-        ),
-      ),
-    );
-  }
-}

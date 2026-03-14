@@ -1,5 +1,7 @@
 import 'package:desco_usage/app_state.dart';
 import 'package:desco_usage/colors.dart';
+import 'package:desco_usage/components/optional.dart';
+import 'package:desco_usage/widgets/loading_indicator.dart';
 import 'package:desco_usage/widgets/table_data.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +18,7 @@ class MeterDetailsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Details"),
         actions: [
+          const LoadingIndicatorWidget(),
           IconButton(
             icon: const Padding(
               padding: .symmetric(horizontal: 10),
@@ -44,36 +47,36 @@ class MeterDetailsPage extends StatelessWidget {
               tableRow("Reading Time", meter.formattedDate),
             ],
           ),
-          const Text("Acc Info"),
           FutureBuilder(
             future: meter.info,
-            builder: (_, snapshot) {
-              if (snapshot.connectionState == .waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final data = snapshot.data!;
-              return DataTableWidget(
+            builder: (_, snapshot) => snapshot.data.mapWidget(
+              (_, data) => Column(
                 children: [
-                  ?optionalTableRow("Name", data.customerName),
-                  ?optionalTableRow("Contact", data.contactNo),
-                  ?optionalTableRow("Load", data.sanctionLoad?.toString()),
-                  ?optionalTableRow("Feeder", data.feederName),
-                  ?optionalTableRow(
-                    "Installation Address",
-                    data.installationAddress,
+                  const TableHeader(header: "Consumer Information"),
+                  DataTableWidget(
+                    children: [
+                      ?optionalTableRow("Name", data.customerName),
+                      ?optionalTableRow("Contact", data.contactNo),
+                      ?optionalTableRow("Load", data.sanctionLoad?.toString()),
+                      ?optionalTableRow("Feeder", data.feederName),
+                      ?optionalTableRow(
+                        "Installation Address",
+                        data.installationAddress,
+                      ),
+                      ?optionalTableRow("S & D", data.sdName),
+                      ?optionalTableRow(
+                        "Installation Date",
+                        data.installationDate?.format(),
+                      ),
+                      ?optionalTableRow("Meter Model", data.meterModel),
+                      ?optionalTableRow("Phase Type", data.phaseType),
+                      ?optionalTableRow("Tariff", data.tariffSolution),
+                      ?optionalTableRow("Transformer", data.transformer),
+                    ],
                   ),
-                  ?optionalTableRow("S & D", data.sdName),
-                  ?optionalTableRow(
-                    "Installation Date",
-                    data.installationDate?.format(),
-                  ),
-                  ?optionalTableRow("Meter Model", data.meterModel),
-                  ?optionalTableRow("Phase Type", data.phaseType),
-                  ?optionalTableRow("Tariff", data.tariffSolution),
-                  ?optionalTableRow("Transformer", data.transformer),
                 ],
-              );
-            },
+              ),
+            ),
           ),
         ],
       ),
