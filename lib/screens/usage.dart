@@ -31,7 +31,7 @@ class UsageScreen extends StatelessWidget {
           itemCount: meterInfos.value.length + 1,
           separatorBuilder: (_, index) => Optional(
             condition: index > 0,
-            child: const Padding(
+            builder: (_) => const Padding(
               padding: .symmetric(horizontal: 16.0),
               child: Divider(color: Colors.grey, thickness: 0.5),
             ),

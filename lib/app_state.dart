@@ -42,7 +42,7 @@ class MeterInfo {
       cacheKey.customarInfoCKey(),
       Info.fromJson,
       () async {
-        final res = await showLoadingIndicator(
+        final res = await LoadingIndicator.show(
           () => getCustomerInfo(meterNo()),
         );
         return res.getData();
@@ -106,7 +106,7 @@ Future<List<MeterRechargeReceipt>> fetchRechargeHistorys(
 }
 
 void addMeter(MeterNo meterNo, BuildContext context) async {
-  final balance = await showLoadingIndicator(() => getBalance(meterNo));
+  final balance = await LoadingIndicator.show(() => getBalance(meterNo));
 
   if (!context.mounted) {
     return;
@@ -164,7 +164,7 @@ class AppInstance {
     final getBalances = meters
         .map(MeterNo.from)
         .whereType<MeterNo>()
-        .map((meterNo) => showLoadingIndicator(() => getBalance(meterNo)));
+        .map((meterNo) => LoadingIndicator.show(() => getBalance(meterNo)));
 
     final balances = await Future.wait(getBalances);
 

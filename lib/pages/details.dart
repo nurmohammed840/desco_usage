@@ -1,6 +1,7 @@
 import 'package:desco_usage/app_state.dart';
 import 'package:desco_usage/colors.dart';
 import 'package:desco_usage/components/optional.dart';
+import 'package:desco_usage/pages/settings.dart';
 import 'package:desco_usage/widgets/loading_indicator.dart';
 import 'package:desco_usage/widgets/table_data.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,7 @@ class MeterDetailsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Details"),
         actions: [
-          const LoadingIndicatorWidget(),
+          const LoadingIndicator(),
           IconButton(
             icon: const Padding(
               padding: .symmetric(horizontal: 10),
@@ -47,7 +48,7 @@ class MeterDetailsPage extends StatelessWidget {
               tableRow("Reading Time", meter.formattedDate),
             ],
           ),
-          ConsumerInfoWidget(meter: meter),
+          if (Settings.showConsumerInfo.value) ConsumerInfoWidget(meter: meter),
         ],
       ),
     );

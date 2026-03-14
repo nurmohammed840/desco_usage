@@ -8,7 +8,7 @@ import '/dialogs/add_meter.dart';
 AppBar appBar(String title) => AppBar(
   title: Text(title),
   actions: [
-    const LoadingIndicatorWidget(),
+    const LoadingIndicator(),
     PopupMenuButton(
       position: .under,
       icon: const Padding(
