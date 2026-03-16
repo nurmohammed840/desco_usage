@@ -1,12 +1,33 @@
 import 'dart:math' as math;
 
+import 'package:desco_usage/api/customer.dart';
+import 'package:desco_usage/api/date.dart';
 import 'package:desco_usage/app_state.dart';
 import 'package:desco_usage/components/optional.dart';
+import 'package:desco_usage/pages/settings.dart';
+import 'package:desco_usage/signal.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-const borderColor = Color(0x77777777);
+const monthNames = [
+  "",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
+const hideTitle = AxisTitles(sideTitles: SideTitles(showTitles: false));
+
+const borderColor = Color(0x77777777);
 const border = Border(
   left: BorderSide(color: borderColor),
   bottom: BorderSide(color: borderColor),
@@ -18,144 +39,318 @@ class DailyConsumptionWidget extends StatelessWidget {
   final MeterInfo meter;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const .all(16),
-      child: SizedBox(
-        height: 200,
-        child: DailyConsumptionLineChart(meter: meter),
-      ),
-    );
-  }
-}
-
-class DailyConsumptionLineChart extends StatelessWidget {
-  const DailyConsumptionLineChart({super.key, required this.meter});
-
-  final MeterInfo meter;
-
-  @override
   Widget build(BuildContext context) => FutureBuilder(
     future: meter.dailyConsumptions.get(),
     builder: (context, snapshot) {
       return snapshot.data.mapWidget((_, data) {
-        final months = groupBy(
-          data,
-          (a, b) => (b.consumedTaka - a.consumedTaka) > 0,
-        );
+        final months = MontlyDailyConsumptionData.from(data);
 
-        final month = months.last;
-
-        List<FlSpot> spots = [];
-
-        double maxConsumtionDiff = 0;
-        double totalDiff = 0;
-
-        for (int i = 1; i < month.length; i++) {
-          final old = month[i - 1].consumedUnit;
-          final curr = month[i].consumedUnit;
-          final diff = curr - old;
-
-          maxConsumtionDiff = math.max(maxConsumtionDiff, diff);
-          totalDiff += diff;
-
-          spots.add(FlSpot(i.toDouble(), diff));
+        if (months.isEmpty) {
+          return const SizedBox.shrink();
         }
 
-        final avgDailyConsumtion = totalDiff / (month.length - 1);
+        final selected = CreateState(months.length - 1);
 
-        var hideTitles = const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        );
-
-        return LineChart(
-          LineChartData(
-            minY: 0,
-            maxY: nearestMultipleOf(
-              math.max(avgDailyConsumtion * 2, maxConsumtionDiff),
-              5,
-            ),
-            gridData: const FlGridData(
-              drawHorizontalLine: true,
-              drawVerticalLine: false,
-            ),
-            borderData: FlBorderData(border: border),
-            lineBarsData: [
-              LineChartBarData(
-                spots: spots,
-                isCurved: true,
-                barWidth: 2,
-                color: Colors.blue,
-                dotData: const FlDotData(show: true),
+        return Column(
+          children: [
+            const Padding(
+              padding: .all(8.0),
+              child: Text(
+                "Daily Consumption",
+                style: TextStyle(fontSize: 20, fontWeight: .bold),
               ),
-            ],
-
-            extraLinesData: ExtraLinesData(
-              horizontalLines: [
-                HorizontalLine(
-                  y: avgDailyConsumtion,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,
-                  strokeWidth: 1,
-                  dashArray: [5, 5],
-                  label: HorizontalLineLabel(show: true, alignment: .topLeft),
-                ),
-              ],
             ),
-
-            titlesData: FlTitlesData(
-              topTitles: hideTitles,
-              rightTitles: hideTitles,
-              leftTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: true, interval: 5),
-              ),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  interval: 1,
-                  getTitlesWidget: (value, meta) {
-                    final val = data[value.toInt()];
-
-                    return SideTitleWidget(
-                      meta: meta,
-                      child: Text(
-                        val.date.day.toString(),
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    );
-                  },
+            selected.watch(
+              (_) => MonthChips(months: months, selected: selected),
+            ),
+            Padding(
+              padding: const .only(right: 16, top: 16, bottom: 16),
+              child: SizedBox(
+                height: 200,
+                child: selected.watch(
+                  (_) =>
+                      DailyConsumptionLineChart(month: months[selected.value]),
                 ),
               ),
             ),
-          ),
+          ],
         );
       });
     },
   );
 }
 
+class MonthChips extends StatelessWidget {
+  const MonthChips({super.key, required this.months, required this.selected});
+
+  final CreateState<int> selected;
+  final List<MontlyDailyConsumptionData> months;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      children: [
+        for (int i = 0; i < months.length; i++)
+          ChoiceChip(
+            // visualDensity: .compact,
+            label: Text(monthNames[months[i].month]),
+            selected: i == selected.value,
+            onSelected: (val) {
+              selected.set(i);
+            },
+          ),
+      ],
+    );
+  }
+}
+
+class DailyConsumptionLineChart extends StatelessWidget {
+  const DailyConsumptionLineChart({super.key, required this.month});
+
+  final MontlyDailyConsumptionData month;
+
+  @override
+  Widget build(BuildContext context) {
+    final data = month.data;
+    final themeData = Theme.of(context);
+
+    return LineChart(
+      LineChartData(
+        minY: 0,
+        maxY: Settings.showDailyTakaDiff.value
+            ? ceilMultipleOf(month.maxDailyConsumtionTakaDiff, 10)
+            : nearestMultipleOf(
+                math.max(
+                  month.avgDailyConsumtionUnitDiff * 2,
+                  month.maxDailyConsumtionUnitDiff,
+                ),
+                5,
+              ),
+
+        gridData: const FlGridData(
+          drawHorizontalLine: true,
+          drawVerticalLine: false,
+        ),
+        borderData: FlBorderData(border: border),
+        lineBarsData: [
+          LineChartBarData(
+            spots: [
+              for (int i = 0; i < data.length; i++)
+                FlSpot(i.toDouble(), data[i].consumedUnitDiff),
+            ],
+            isCurved: true,
+            barWidth: 2,
+            color: Colors.blue,
+            dotData: const FlDotData(show: true),
+          ),
+
+          if (Settings.showDailyTakaDiff.value)
+            LineChartBarData(
+              spots: [
+                for (int i = 0; i < data.length; i++)
+                  FlSpot(i.toDouble(), data[i].consumedTakaDiff),
+              ],
+              isCurved: true,
+              barWidth: 2,
+              color: Colors.red,
+              dotData: const FlDotData(show: true),
+            ),
+        ],
+
+        extraLinesData: ExtraLinesData(
+          horizontalLines: [
+            HorizontalLine(
+              y: month.avgDailyConsumtionUnitDiff,
+              color: themeData.brightness == .dark
+                  ? Colors.white
+                  : Colors.black,
+
+              strokeWidth: 1,
+              dashArray: [5, 5],
+              label: HorizontalLineLabel(show: true, alignment: .topLeft),
+            ),
+          ],
+        ),
+
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (touchedSpot) =>
+                themeData.colorScheme.surfaceContainerHigh,
+
+            getTooltipItems: (spots) {
+              return [
+                for (final spot in spots)
+                  LineTooltipItem(
+                    spot.y.toStringAsFixed(2), // number on the dot
+                    TextStyle(
+                      color: spot.bar.color ?? Colors.blueGrey,
+                      fontWeight: .bold,
+                      fontSize: 14,
+                    ),
+                    children: [
+                      if (spot.barIndex == 0)
+                        TextSpan(
+                          text: "\n${data[spot.spotIndex].date.day}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: themeData.colorScheme.onSurface,
+                          ),
+                        ),
+                    ],
+                  ),
+              ];
+            },
+          ),
+        ),
+
+        titlesData: FlTitlesData(
+          topTitles: hideTitle,
+          rightTitles: hideTitle,
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 30, // space for labels
+            ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: data.length >= 21 ? 2 : 1,
+              getTitlesWidget: (idx, meta) => SideTitleWidget(
+                meta: meta,
+                child: Text(
+                  data[idx.toInt()].date.day.toString(),
+                  style: const TextStyle(fontSize: 10),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 double nearestMultipleOf(double value, double n) {
   return (value / n).round() * n;
 }
 
-List<List<T>> groupBy<T>(List<T> items, bool Function(T a, T b) cond) {
-  if (items.isEmpty) return [];
+double ceilMultipleOf(double value, double n) {
+  return (value / n).ceil() * n;
+}
 
-  List<List<T>> groups = [];
-  List<T> curr = [items.first];
+class DailyConsumptionData {
+  DailyConsumptionData({
+    required this.consumedTaka,
+    required this.consumedUnit,
+    required this.consumedUnitDiff,
+    required this.consumedTakaDiff,
+    required this.date,
+  });
 
-  for (int i = 1; i < items.length; i++) {
-    T a = items[i - 1];
-    T b = items[i];
+  double consumedTaka;
+  double consumedUnit;
+  double consumedUnitDiff;
+  double consumedTakaDiff;
 
-    if (cond(a, b)) {
-      curr.add(b);
-    } else {
-      groups.add(curr);
-      curr = [b];
+  Date date;
+
+  static Iterable<List<DailyConsumptionData>> from(
+    List<DailyConsumption> data,
+  ) sync* {
+    List<DailyConsumptionData> thisMonth = [];
+
+    for (int i = 1; i < data.length; i++) {
+      final prev = data[i - 1];
+      final curr = data[i];
+      double consumedUnitDiff = curr.consumedUnit - prev.consumedUnit;
+      double consumedTakaDiff = curr.consumedTaka - prev.consumedTaka;
+
+      if (consumedTakaDiff < 0) {
+        consumedUnitDiff = 0;
+        consumedTakaDiff = curr.consumedTaka;
+        yield thisMonth;
+        thisMonth = [];
+      }
+
+      thisMonth.add(
+        DailyConsumptionData(
+          date: curr.date,
+          consumedTaka: curr.consumedTaka,
+          consumedUnit: curr.consumedUnit,
+          consumedTakaDiff: consumedTakaDiff,
+          consumedUnitDiff: consumedUnitDiff,
+        ),
+      );
     }
+    yield thisMonth;
   }
-  groups.add(curr);
-  return groups;
+}
+
+class MontlyDailyConsumptionData {
+  MontlyDailyConsumptionData({
+    required this.month,
+    required this.data,
+    required this.avgDailyConsumtionUnitDiff,
+    required this.maxDailyConsumtionUnitDiff,
+    required this.maxDailyConsumtionTakaDiff,
+  });
+
+  int month;
+
+  double avgDailyConsumtionUnitDiff;
+  double maxDailyConsumtionUnitDiff;
+
+  double maxDailyConsumtionTakaDiff;
+
+  List<DailyConsumptionData> data;
+
+  static List<MontlyDailyConsumptionData> from(List<DailyConsumption> data) {
+    final List<MontlyDailyConsumptionData> array = [];
+    for (final data in DailyConsumptionData.from(data)) {
+      if (data.isEmpty) continue;
+
+      double totalConsumtionUnitDiff = 0;
+      double maxDailyConsumtionUnitDiff = 0;
+      double maxDailyConsumtionTakaDiff = 0;
+
+      for (var item in data) {
+        totalConsumtionUnitDiff += item.consumedUnitDiff;
+        maxDailyConsumtionUnitDiff = math.max(
+          maxDailyConsumtionUnitDiff,
+          item.consumedUnitDiff,
+        );
+        maxDailyConsumtionTakaDiff = math.max(
+          maxDailyConsumtionTakaDiff,
+          item.consumedTakaDiff,
+        );
+      }
+      final avgDailyConsumtion = totalConsumtionUnitDiff / data.length;
+      // data[0].consumedUnitDiff = avgDailyConsumtion;
+
+      array.add(
+        MontlyDailyConsumptionData(
+          maxDailyConsumtionUnitDiff: maxDailyConsumtionUnitDiff,
+          maxDailyConsumtionTakaDiff: maxDailyConsumtionTakaDiff,
+          avgDailyConsumtionUnitDiff: avgDailyConsumtion,
+          data: data,
+          month: data[data.length ~/ 2].date.month,
+        ),
+      );
+    }
+
+    // for (final item in array) {
+    //   print("==========");
+    //   for (final val in item.data) {
+    //     print(val.consumedUnit);
+    //   }
+    // }
+
+    if (array.length > 1 && array[0].data.length < 7) {
+      array.removeAt(0);
+    }
+    return array;
+  }
 }

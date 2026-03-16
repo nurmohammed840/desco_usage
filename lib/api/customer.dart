@@ -126,14 +126,14 @@ class Info extends JsonSerializable {
 
 class DailyConsumption {
   DailyConsumption({
-    required this.accountNo,
     required this.consumedTaka,
     required this.consumedUnit,
-    required this.meterNo,
     required this.date,
-    required this.sanctionLoad,
-    required this.tariffSolution,
+    this.sanctionLoad,
+    this.tariffSolution,
     this.installationAddress,
+    this.meterNo,
+    this.accountNo,
     this.phaseType,
     this.customerName,
     this.importReactiveEnergyIncrement,
@@ -154,15 +154,16 @@ class DailyConsumption {
         tariffSolution: json["tariffSolution"],
       );
 
-  String accountNo;
-  String meterNo;
-
   double consumedTaka;
   double consumedUnit;
 
   Date date;
-  int sanctionLoad;
-  String tariffSolution;
+  
+  int? sanctionLoad;
+  String? tariffSolution;
+
+  String? accountNo;
+  String? meterNo;
 
   String? phaseType;
   String? customerName;
