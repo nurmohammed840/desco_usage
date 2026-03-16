@@ -148,7 +148,7 @@ class DailyConsumption {
         importReactiveEnergyIncrement: json["importReactiveEnergyIncrement"],
         installationAddress: json["installationAddress"],
         meterNo: json["meterNo"],
-        date: Date.from(DateTime.parse(json["date"])),
+        date: DateTime.parse(json["date"]),
         phaseType: json["phaseType"],
         sanctionLoad: json["sanctionLoad"],
         tariffSolution: json["tariffSolution"],
@@ -157,7 +157,7 @@ class DailyConsumption {
   double consumedTaka;
   double consumedUnit;
 
-  Date date;
+  DateTime date;
   
   int? sanctionLoad;
   String? tariffSolution;

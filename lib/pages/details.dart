@@ -43,10 +43,7 @@ class MeterDetailsPage extends StatelessWidget {
               tableRow("Account No", balance.accountNo),
               tableRow("Meter No", balance.meterNo),
               tableRow("Balance", "৳ ${balance.balance}"),
-              tableRow(
-                "Month Consumption",
-                "${balance.currentMonthConsumption} kWh",
-              ),
+              tableRow("Consumption", "${balance.currentMonthConsumption} kWh"),
               tableRow("Reading Time", meter.formattedDate),
             ],
           ),
@@ -96,4 +93,4 @@ class ConsumerInfoWidget extends StatelessWidget {
       ),
     ),
   );
-}
+} 

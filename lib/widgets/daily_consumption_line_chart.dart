@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:desco_usage/api/customer.dart';
-import 'package:desco_usage/api/date.dart';
 import 'package:desco_usage/app_state.dart';
 import 'package:desco_usage/components/optional.dart';
 import 'package:desco_usage/format.dart';
@@ -28,6 +27,10 @@ const monthNames = [
 
 const hideTitle = AxisTitles(sideTitles: SideTitles(showTitles: false));
 
+const flGridData = FlGridData(
+  drawHorizontalLine: true,
+  drawVerticalLine: false,
+);
 const borderColor = Color(0x77777777);
 const border = Border(
   left: BorderSide(color: borderColor),
@@ -122,7 +125,7 @@ class DailyConsumptionLineChart extends StatelessWidget {
         minY: 0,
         maxY: Settings.showDailyTakaDiff.value
             ? ceilMultipleOf(month.maxDailyConsumtionTakaDiff, 10)
-            : nearestMultipleOf(
+            : ceilMultipleOf(
                 math.max(
                   month.avgDailyConsumtionUnitDiff * 2,
                   month.maxDailyConsumtionUnitDiff,
@@ -130,10 +133,7 @@ class DailyConsumptionLineChart extends StatelessWidget {
                 5,
               ),
 
-        gridData: const FlGridData(
-          drawHorizontalLine: true,
-          drawVerticalLine: false,
-        ),
+        gridData: flGridData,
         borderData: FlBorderData(border: border),
         lineBarsData: [
           LineChartBarData(
@@ -144,7 +144,6 @@ class DailyConsumptionLineChart extends StatelessWidget {
             isCurved: true,
             barWidth: 2,
             color: Colors.blue,
-            dotData: const FlDotData(show: true),
           ),
 
           if (Settings.showDailyTakaDiff.value)
@@ -156,7 +155,6 @@ class DailyConsumptionLineChart extends StatelessWidget {
               isCurved: true,
               barWidth: 2,
               color: Colors.red,
-              dotData: const FlDotData(show: true),
             ),
         ],
 
@@ -164,10 +162,7 @@ class DailyConsumptionLineChart extends StatelessWidget {
           horizontalLines: [
             HorizontalLine(
               y: month.avgDailyConsumtionUnitDiff,
-              color: themeData.brightness == .dark
-                  ? Colors.white
-                  : Colors.black,
-
+              color: themeData.colorScheme.onSurface,
               strokeWidth: 1,
               dashArray: [5, 5],
               label: HorizontalLineLabel(show: true, alignment: .topLeft),
@@ -196,7 +191,7 @@ class DailyConsumptionLineChart extends StatelessWidget {
                 children: [
                   if (spot.barIndex == 0)
                     TextSpan(
-                      text: "\n${dateFormatterAlt.format(item.date.time())}",
+                      text: "\n${dateFormatterAlt.format(item.date)}",
                       style: TextStyle(
                         fontSize: 12,
                         color: themeData.colorScheme.onSurface,
@@ -246,19 +241,18 @@ double ceilMultipleOf(double value, double n) {
 
 class DailyConsumptionData {
   DailyConsumptionData({
+    required this.date,
     required this.consumedTaka,
     required this.consumedUnit,
     required this.consumedUnitDiff,
     required this.consumedTakaDiff,
-    required this.date,
   });
 
+  DateTime date;
   double consumedTaka;
   double consumedUnit;
   double consumedUnitDiff;
   double consumedTakaDiff;
-
-  Date date;
 
   static Iterable<List<DailyConsumptionData>> from(
     List<DailyConsumption> data,
@@ -330,8 +324,8 @@ class MontlyDailyConsumptionData {
           item.consumedTakaDiff,
         );
       }
-      final avgDailyConsumtion = totalConsumtionUnitDiff / data.length;
-      // data[0].consumedUnitDiff = avgDailyConsumtion;
+
+      final avgDailyConsumtion = totalConsumtionUnitDiff / (data.length - 1);
 
       array.add(
         MontlyDailyConsumptionData(

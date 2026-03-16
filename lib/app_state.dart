@@ -25,7 +25,7 @@ class MeterRechargeReceipt {
 
 class MeterInfo {
   MeterInfo({required this.balance, required this.color})
-    : formattedDate = dateFormatterAlt.format(balance.readingTime.time()),
+    : formattedDate = dateFormatterAltFull.format(balance.readingTime.time()),
       cacheKey = CacheKey(meterNo: balance.meterNo);
 
   final Color color;
