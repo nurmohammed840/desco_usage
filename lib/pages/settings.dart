@@ -7,6 +7,7 @@ class Settings extends StatelessWidget {
   static final theme = CreateState(ThemeMode.light);
   static final showConsumerInfo = CreateState(true);
   static final showDailyTakaDiff = CreateState(true);
+  static final showAmountLabels = CreateState(true);
 
   @override
   Widget build(BuildContext context) {
@@ -31,22 +32,32 @@ class Settings extends StatelessWidget {
               subtitle: const Text("Enable to display consumer details"),
               secondary: const Icon(Icons.person),
               value: showConsumerInfo.value,
-              onChanged: (value) {
-                showConsumerInfo.set(value);
-              },
+              onChanged: showConsumerInfo.set,
             ),
           ),
           showDailyTakaDiff.watch(
             (_) => SwitchListTile(
-              title: const Text("Daily Consumption Diff"),
+              title: const Text("Consumption Amount Delta"),
               subtitle: const Text(
                 "Show line chart for daily consumed difference in Taka",
               ),
               secondary: const Icon(Icons.trending_up),
               value: showDailyTakaDiff.value,
-              onChanged: (value) {
-                showDailyTakaDiff.set(value);
-              },
+              onChanged: showDailyTakaDiff.set,
+            ),
+          ),
+          showAmountLabels.watch(
+            (_) => SwitchListTile(
+              title: const Text("Show Amount Labels"),
+              subtitle: const Text(
+                "Display Taka values on the consumption line chart at top",
+              ),
+              secondary: const Text(
+                "৳",
+                style: TextStyle(fontSize: 26, fontWeight: .bold),
+              ),
+              value: showAmountLabels.value,
+              onChanged: showAmountLabels.set,
             ),
           ),
         ],
