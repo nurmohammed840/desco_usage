@@ -19,7 +19,18 @@ class MeterDetailsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Details"),
+        title: ListTile(
+          dense: true,
+          contentPadding: .zero,
+          visualDensity: .compact,
+          leading: const Icon(Icons.electric_meter),
+          iconColor: meter.color,
+          title: Text(
+            balance.accountNo,
+            style: const TextStyle(fontWeight: .bold),
+          ),
+          subtitle: Text(balance.meterNo),
+        ),
         actions: [
           const LoadingIndicator(),
           IconButton(
@@ -40,8 +51,8 @@ class MeterDetailsPage extends StatelessWidget {
         children: [
           DataTableWidget(
             children: [
-              tableRow("Account No", balance.accountNo),
-              tableRow("Meter No", balance.meterNo),
+              // tableRow("Account No", balance.accountNo),
+              // tableRow("Meter No", balance.meterNo),
               tableRow("Balance", "৳ ${balance.balance}"),
               tableRow(
                 "Consumption",
@@ -96,4 +107,4 @@ class ConsumerInfoWidget extends StatelessWidget {
       ),
     ),
   );
-} 
+}

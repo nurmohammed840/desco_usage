@@ -1,15 +1,16 @@
 import './tariff.dart';
 
-double calculateEnergyCost(int units, TariffProvider provider) {
+double calculateEnergyCost(double units, ElectricityTariff provider) {
   double cost = 0;
-  int remaining = units;
+  double remaining = units;
 
-  for (var tariff in provider.tariffs) {
-    int slabFrom = tariff.range.from;
-    int slabTo = tariff.range.to ?? units; // if `to` is null, treat as infinite
+  for (var tariff in provider.slabs) {
+    double slabFrom = tariff.range.start;
+    double slabTo =
+        tariff.range.end ?? units; // if `to` is null, treat as infinite
 
     // Calculate units in this slab
-    int slabUnits = 0;
+    double slabUnits = 0;
     if (remaining > 0) {
       // slabUnits = slabTo - slabFrom + 1;
 
@@ -28,6 +29,41 @@ double calculateEnergyCost(int units, TariffProvider provider) {
   }
 
   return cost;
+}
+
+double calculateUnitFromEnergyCost(double cost, ElectricityTariff provider) {
+  double remainingCost = cost;
+
+  final lifeLine = provider.lifeLine;
+  if (lifeLine != null) {
+    final slabUnits = lifeLine.range.end ?? 0;
+    final maxCost = slabUnits * lifeLine.price;
+
+    if (remainingCost <= maxCost) {
+      return remainingCost / lifeLine.price;
+    }
+  }
+
+  double unit = 0;
+
+  for (final tariff in provider.slabs) {
+    double slabFrom = tariff.range.start;
+    double slabTo =
+        tariff.range.end ??
+        double.infinity; // if `to` is null, treat as infinite
+
+    double slabUnits = (slabTo - slabFrom + 1);
+    double slabCost = slabUnits * tariff.price;
+
+    if (remainingCost > slabCost) {
+      unit += slabUnits;
+      remainingCost -= slabCost;
+    } else {
+      unit += remainingCost / tariff.price;
+      break;
+    }
+  }
+  return unit;
 }
 
 double calculateTotalBill(

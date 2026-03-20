@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:desco_usage/api/calculator.dart';
+import 'package:desco_usage/api/tariff.dart' as tariff;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -216,7 +218,7 @@ class DailyConsumptionLineChart extends StatelessWidget {
             final item = data[spot.spotIndex];
             return LineTooltipItem(
               spot.barIndex == 0
-                  ? spot.y.toStringAsFixed(2)
+                  ? "${spot.y.toStringAsFixed(2)} (${calculateUnitFromEnergyCost(item.consumedTaka, tariff.ResidentialTariff()).round()})"
                   : "${spot.y.round()} (${item.consumedTaka.round()})",
 
               TextStyle(color: spot.bar.color, fontWeight: .bold, fontSize: 14),
@@ -318,7 +320,43 @@ class PradictionGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lineChartData = LineChartData();
+    final data = month.data;
+    final numOfRemainingDays = remainingDaysInMonth(data.last.date);
+
+    if (numOfRemainingDays == 0) {
+      return const SizedBox.shrink();
+    }
+
+    // final firstDayConsumedTaka = data.first.consumedTaka;
+    final lastDayUnit = data.last.consumedUnit - data.first.consumedUnit;
+
+    // {
+    //   final energyCost = calculateEnergyCost(lastDayUnit, tariff.LA()).round();
+    //   print(
+    //     "lastDayUnit: $lastDayUnit; EnergyCost: $firstDayConsumedTaka + $energyCost = ${firstDayConsumedTaka + energyCost}",
+    //   );
+    // }
+
+    final val = calculateEnergyCost(
+      lastDayUnit + month.avgDailyConsumtionUnitDiff,
+      tariff.ResidentialTariff(),
+    );
+
+    final lineChartData = LineChartData(
+      minY: 0,
+      lineBarsData: [
+        LineChartBarData(
+          spots: [
+            for (int i = 0; i < numOfRemainingDays; i++)
+              FlSpot(i.toDouble(), val),
+          ],
+          isCurved: true,
+          barWidth: 2,
+          color: Colors.red,
+          dotData: const FlDotData(show: true),
+        ),
+      ],
+    );
     return LineChart(lineChartData);
   }
 }
@@ -334,6 +372,11 @@ double computeTitleInterval({
 
 double ceilMultipleOf(double value, double n) {
   return (value / n).ceil() * n;
+}
+
+int remainingDaysInMonth(DateTime date) {
+  final lastDayOfMonth = DateTime(date.year, date.month + 1, 0);
+  return lastDayOfMonth.day - date.day;
 }
 
 class DailyConsumptionData {
