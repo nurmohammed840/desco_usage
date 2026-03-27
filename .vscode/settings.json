@@ -11,6 +11,7 @@
         ".flutter-plugins-dependencies": true,
         "pubspec.lock": true,
         "desco_usage.iml": true,
+        "devtools_options.yaml": true,
         // -------------
         "build": true,
         "android": true,

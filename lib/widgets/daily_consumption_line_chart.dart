@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:desco_usage/api/calculator.dart';
-import 'package:desco_usage/api/tariff.dart' as tariff;
+import 'package:desco_usage/api/tariff.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -216,9 +216,13 @@ class DailyConsumptionLineChart extends StatelessWidget {
 
           getTooltipItems: (spots) => spots.map((spot) {
             final item = data[spot.spotIndex];
+            final unit = item.energyUnit()?.round();
+
             return LineTooltipItem(
               spot.barIndex == 0
-                  ? "${spot.y.toStringAsFixed(2)} (${calculateUnitFromEnergyCost(item.consumedTaka, tariff.ResidentialTariff()).round()})"
+                  ? unit != null
+                        ? "${spot.y.toStringAsFixed(2)} ($unit)"
+                        : spot.y.toStringAsFixed(2)
                   : "${spot.y.round()} (${item.consumedTaka.round()})",
 
               TextStyle(color: spot.bar.color, fontWeight: .bold, fontSize: 14),
@@ -328,7 +332,7 @@ class PradictionGraph extends StatelessWidget {
     }
 
     // final firstDayConsumedTaka = data.first.consumedTaka;
-    final lastDayUnit = data.last.consumedUnit - data.first.consumedUnit;
+    // final lastDayUnit = data.last.consumedUnit - data.first.consumedUnit;
 
     // {
     //   final energyCost = calculateEnergyCost(lastDayUnit, tariff.LA()).round();
@@ -337,10 +341,11 @@ class PradictionGraph extends StatelessWidget {
     //   );
     // }
 
-    final val = calculateEnergyCost(
-      lastDayUnit + month.avgDailyConsumtionUnitDiff,
-      tariff.ResidentialTariff(),
-    );
+    const val = 5.0;
+    // final val = calculateEnergyCost(
+    //   lastDayUnit + month.avgDailyConsumtionUnitDiff,
+    //   tariff.ResidentialTariff(),
+    // );
 
     final lineChartData = LineChartData(
       minY: 0,
@@ -386,6 +391,7 @@ class DailyConsumptionData {
     required this.consumedUnit,
     required this.consumedUnitDiff,
     required this.consumedTakaDiff,
+    required this.tariffCategory,
   });
 
   DateTime date;
@@ -393,6 +399,8 @@ class DailyConsumptionData {
   double consumedUnit;
   double consumedUnitDiff;
   double consumedTakaDiff;
+
+  TariffCategory? tariffCategory;
 
   static Iterable<List<DailyConsumptionData>> from(
     List<DailyConsumption> data,
@@ -420,10 +428,20 @@ class DailyConsumptionData {
           consumedUnit: curr.consumedUnit,
           consumedTakaDiff: consumedTakaDiff,
           consumedUnitDiff: consumedUnitDiff,
+          tariffCategory: TariffCategory.fromCategorySolution(
+            curr.tariffSolution ?? "",
+          ),
         ),
       );
     }
     yield thisMonth;
+  }
+
+  double? energyUnit() {
+    if (tariffCategory == TariffCategory.lowTensionA) {
+      return ResidentialTariff.instance.unitFromEnergyCost(consumedTaka);
+    }
+    return null;
   }
 }
 
@@ -472,13 +490,15 @@ class MontlyDailyConsumptionData {
 
       final avgDailyConsumtion = totalConsumtionUnitDiff / itemCount;
 
+      final dateOfMiddle = data[data.length ~/ 2];
+
       array.add(
         MontlyDailyConsumptionData(
           maxDailyConsumtionUnitDiff: maxDailyConsumtionUnitDiff,
           maxDailyConsumtionTakaDiff: maxDailyConsumtionTakaDiff,
           avgDailyConsumtionUnitDiff: avgDailyConsumtion,
           data: data,
-          month: data[data.length ~/ 2].date.month,
+          month: dateOfMiddle.date.month,
         ),
       );
     }

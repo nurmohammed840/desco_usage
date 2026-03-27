@@ -1,69 +1,82 @@
 import './tariff.dart';
 
-double calculateEnergyCost(double units, ElectricityTariff provider) {
-  double cost = 0;
-  double remaining = units;
+class ResidentialTariff {
+  ResidentialTariff();
 
-  for (var tariff in provider.slabs) {
-    double slabFrom = tariff.range.start;
-    double slabTo =
-        tariff.range.end ?? units; // if `to` is null, treat as infinite
+  static final instance = ResidentialTariff();
 
-    // Calculate units in this slab
-    double slabUnits = 0;
-    if (remaining > 0) {
-      // slabUnits = slabTo - slabFrom + 1;
+  final double demandCharge = 42.00;
 
-      slabUnits = (remaining + slabFrom > slabTo)
-          ? (slabTo - slabFrom + 1)
-          : remaining;
+  TariffCategory category = TariffCategory.lowTensionA;
 
-      cost += slabUnits * tariff.price;
+  final SlabRate lifeLine = SlabRate(start: 0, end: 50, price: 4.63);
 
-      // print(
-      //   "slabUnits: $slabUnits * ${tariff.price} = ${slabUnits * tariff.price}; cost = $cost",
-      // );
+  final slabs = [
+    SlabRate(start: 1, end: 75, price: 5.26),
+    SlabRate(start: 76, end: 200, price: 7.20),
+    SlabRate(start: 201, end: 300, price: 7.59),
+    SlabRate(start: 301, end: 400, price: 8.02),
+    SlabRate(start: 401, end: 600, price: 12.67),
+    SlabRate(start: 601, price: 14.61),
+  ];
 
-      remaining -= slabUnits;
-    }
-  }
+  double unitFromEnergyCost(double cost) {
+    double remainingCost = cost;
 
-  return cost;
-}
-
-double calculateUnitFromEnergyCost(double cost, ElectricityTariff provider) {
-  double remainingCost = cost;
-
-  final lifeLine = provider.lifeLine;
-  if (lifeLine != null) {
-    final slabUnits = lifeLine.range.end ?? 0;
-    final maxCost = slabUnits * lifeLine.price;
-
-    if (remainingCost <= maxCost) {
+    final lifeLineMaxCost = lifeLine.end! * lifeLine.price;
+    if (remainingCost <= lifeLineMaxCost) {
       return remainingCost / lifeLine.price;
     }
-  }
 
-  double unit = 0;
+    double unit = 0;
 
-  for (final tariff in provider.slabs) {
-    double slabFrom = tariff.range.start;
-    double slabTo =
-        tariff.range.end ??
-        double.infinity; // if `to` is null, treat as infinite
+    for (final tariff in slabs) {
+      double slabFrom = tariff.start;
+      double slabTo =
+          tariff.end ?? double.infinity; // if `to` is null, treat as infinite
 
-    double slabUnits = (slabTo - slabFrom + 1);
-    double slabCost = slabUnits * tariff.price;
+      double slabUnits = (slabTo - slabFrom + 1);
+      double slabCost = slabUnits * tariff.price;
 
-    if (remainingCost > slabCost) {
-      unit += slabUnits;
-      remainingCost -= slabCost;
-    } else {
-      unit += remainingCost / tariff.price;
-      break;
+      if (remainingCost > slabCost) {
+        unit += slabUnits;
+        remainingCost -= slabCost;
+      } else {
+        unit += remainingCost / tariff.price;
+        break;
+      }
     }
+    return unit;
   }
-  return unit;
+
+  double energyCost(double units) {
+    double cost = 0;
+    double remaining = units;
+
+    for (var tariff in slabs) {
+      double slabFrom = tariff.start;
+      double slabTo = tariff.end ?? units; // if `to` is null, treat as infinite
+
+      double slabUnits = 0;
+      if (remaining > 0) {
+        // slabUnits = slabTo - slabFrom + 1;
+
+        slabUnits = (remaining + slabFrom > slabTo)
+            ? (slabTo - slabFrom + 1)
+            : remaining;
+
+        cost += slabUnits * tariff.price;
+
+        // print(
+        //   "slabUnits: $slabUnits * ${tariff.price} = ${slabUnits * tariff.price}; cost = $cost",
+        // );
+
+        remaining -= slabUnits;
+      }
+    }
+
+    return cost;
+  }
 }
 
 double calculateTotalBill(
