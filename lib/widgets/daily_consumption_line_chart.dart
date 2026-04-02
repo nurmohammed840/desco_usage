@@ -129,27 +129,26 @@ class MonthChips extends StatelessWidget {
 class PlotLineChart extends StatelessWidget {
   const PlotLineChart({
     super.key,
-    required this.month,
+    required this.data,
     required this.constraints,
     required this.lineBarsData,
     required this.lineTouchData,
-    this.maxY,
-    this.showExtraLinesData = true,
+    required this.maxY,
+    this.extraLinesData,
   });
 
-  final MontlyDailyConsumptionData month;
+  // final MontlyDailyConsumptionData month;
+  final List<DailyConsumptionData> data;
   final BoxConstraints constraints;
 
   final List<LineChartBarData> lineBarsData;
   final LineTouchData lineTouchData;
 
-  final double? maxY;
-  final bool showExtraLinesData;
+  final double maxY;
+  final ExtraLinesData? extraLinesData;
 
   @override
   Widget build(BuildContext context) {
-    final data = month.data;
-    final themeData = Theme.of(context);
 
     final amountTitleInterval = computeTitleInterval(
       chartWidth: constraints.maxWidth,
@@ -163,29 +162,12 @@ class PlotLineChart extends StatelessWidget {
       labelWidth: 20,
     );
 
-    ExtraLinesData? extraLinesData;
-
-    if (showExtraLinesData) {
-      extraLinesData = ExtraLinesData(
-        horizontalLines: [
-          HorizontalLine(
-            y: month.avgDailyConsumtionUnitDiff,
-            color: themeData.colorScheme.onSurface,
-            strokeWidth: 1,
-            dashArray: const [5, 5],
-            label: HorizontalLineLabel(
-              show: true,
-              alignment: Alignment.topLeft,
-            ),
-          ),
-        ],
-      );
-    }
-
     final lineChartData = LineChartData(
       minX: 0,
+      minY: 0,
       maxY: maxY,
       lineBarsData: lineBarsData,
+
       extraLinesData: extraLinesData,
 
       borderData: FlBorderData(
@@ -275,7 +257,7 @@ class DailyConsumptionLineChart extends StatelessWidget {
   Widget build(context) {
     final themeData = Theme.of(context);
     return PlotLineChart(
-      month: month,
+      data: month.data,
       constraints: constraints,
       maxY: Settings.showDailyTakaDiff.value
           ? ceilMultipleOf(month.maxDailyConsumtionTakaDiff, 10)
@@ -311,6 +293,18 @@ class DailyConsumptionLineChart extends StatelessWidget {
             dotData: const FlDotData(show: true),
           ),
       ],
+
+      extraLinesData: ExtraLinesData(
+        horizontalLines: [
+          HorizontalLine(
+            y: month.avgDailyConsumtionUnitDiff,
+            color: themeData.colorScheme.onSurface,
+            strokeWidth: 1,
+            dashArray: const [5, 5],
+            label: HorizontalLineLabel(show: true, alignment: .topLeft),
+          ),
+        ],
+      ),
 
       lineTouchData: LineTouchData(
         touchTooltipData: LineTouchTooltipData(
@@ -369,11 +363,11 @@ class PradictionGraph extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final avgUnitDiff = month.avgDailyConsumtionUnitDiff;
     var prevDayConsumedTaka = lastDay.consumedTaka;
 
     final upcomingData = List.generate(numOfRemainingDays, (idx) {
-      final consumedUnit = lastDayUnit + ((idx + 1) * avgUnitDiff);
+      final consumedUnit =
+          lastDayUnit + ((idx + 1) * month.avgDailyConsumtionUnitDiff);
       final currentTaka = ResidentialTariff.instance.energyCost(consumedUnit);
       final consumedTakaDiff = currentTaka - prevDayConsumedTaka;
 
@@ -383,23 +377,16 @@ class PradictionGraph extends StatelessWidget {
         date: lastDay.date.add(Duration(days: idx + 1)),
         consumedTaka: currentTaka,
         consumedUnit: consumedUnit,
-        consumedUnitDiff: avgUnitDiff,
+        consumedUnitDiff: month.avgDailyConsumtionUnitDiff,
         consumedTakaDiff: consumedTakaDiff,
         tariffCategory: TariffCategory.lowTensionA,
       );
     });
 
     return PlotLineChart(
-      showExtraLinesData: false,
+      data: upcomingData,
       constraints: constraints,
-      month: MontlyDailyConsumptionData(
-        data: upcomingData,
-        month: month.month,
-        avgDailyConsumtionUnitDiff: 0,
-        maxDailyConsumtionUnitDiff: 0,
-        maxDailyConsumtionTakaDiff: 0,
-        tariffCategory: month.tariffCategory,
-      ),
+      maxY: ceilMultipleOf(month.maxDailyConsumtionTakaDiff, 10),
       lineBarsData: [
         LineChartBarData(
           spots: [
