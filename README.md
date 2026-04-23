@@ -1,16 +1,16 @@
-# desco_usage
+# Electricity Usage
 
-A new Flutter project.
+This app is not affiliated with DESCO. It is developed independently to help users track their electricity consumption and balance.
 
-## Getting Started
+## Providers 
 
-This project is a starting point for a Flutter application.
+- [x] DESCO: Dhaka Electric Supply Company
+- [ ] DPDC: Dhaka Power Distribution Company
+- [ ] BPDB: Bangladesh Power Development Board
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Images
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+| ![img 1](./assets/1.jpg) | ![img 2](./assets/2.jpg) | ![img 3](./assets/3.jpg) |
+| ------------------------ | ------------------------ | ------------------------ |
+| ![img 4](./assets/4.jpg) | ![img 5](./assets/5.jpg) |                          |

@@ -16,6 +16,7 @@
         "build": true,
         "android": true,
         "ios": true,
+        "assets": true,
         "linux": true,
         "macos": true,
         "web": true,
