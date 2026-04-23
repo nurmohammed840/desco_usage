@@ -1,3 +1,4 @@
+import 'package:desco_usage/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 
 import '/components/error_snackbar.dart';
@@ -12,12 +13,14 @@ import '/components/center_widget.dart';
 class UsageScreen extends StatelessWidget {
   const UsageScreen({super.key});
 
+  static final loadingIndicator = LoadingIndicator();
+
   static CreateState<Object?> error = CreateState(null);
   static Listenable usageEvent = Listenable.merge([error, meterInfos]);
 
   @override
   Widget build(BuildContext _) => Scaffold(
-    appBar: appBar("Usage"),
+    appBar: appBar("Usage", actions: [UsageScreen.loadingIndicator]),
     body: Watch(
       signal: usageEvent,
       builder: (_) {

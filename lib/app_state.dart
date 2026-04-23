@@ -1,12 +1,12 @@
 import 'package:desco_usage/cache.dart';
 import 'package:desco_usage/format.dart';
+import 'package:desco_usage/pages/details.dart';
 import 'package:desco_usage/screens/usage.dart';
 import 'package:desco_usage/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/components/error_snackbar.dart';
-import '/widgets/loading_indicator.dart';
 import '/api/date.dart';
 import '/api/api.dart';
 import '/api/customer.dart';
@@ -39,7 +39,7 @@ class MeterInfo {
       cacheKey.customarInfoCKey(),
       Info.fromJson,
       () async {
-        final res = await LoadingIndicator.show(
+        final res = await MeterDetailsPage.loadingIndicator.show(
           () => getCustomerInfo(meterNo()),
         );
         return res.getData();
@@ -52,10 +52,11 @@ class MeterInfo {
       final today = Date.now();
       final from = Date.from(today.time().subtract(const Duration(days: 120)));
 
-      final res = await getDailyConsumptions(meterNo(), from, today);
-      final dailyConsumptions = res.getData();
+      final res = await MeterDetailsPage.loadingIndicator.show(
+        () => getDailyConsumptions(meterNo(), from, today),
+      );
 
-      return dailyConsumptions;
+      return res.getData();
     },
   );
 
@@ -92,7 +93,9 @@ Future<List<MeterRechargeReceipt>> fetchRechargeHistorys(
 }
 
 void addMeter(MeterNo meterNo, BuildContext context) async {
-  final balance = await LoadingIndicator.show(() => getBalance(meterNo));
+  final balance = await UsageScreen.loadingIndicator.show(
+    () => getBalance(meterNo),
+  );
 
   if (!context.mounted) {
     return;
@@ -148,7 +151,7 @@ class AppInstance {
           .whereType<MeterNo>()
           .map((meterNo) => getBalance(meterNo));
 
-      final balances = await LoadingIndicator.show(
+      final balances = await UsageScreen.loadingIndicator.show(
         () => Future.wait(getBalances),
       );
 

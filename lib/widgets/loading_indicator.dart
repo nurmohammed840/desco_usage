@@ -3,15 +3,16 @@ import 'package:flutter/material.dart';
 import '/components/optional.dart';
 import '/signal.dart';
 
-
-
 class LoadingIndicator extends StatelessWidget {
-  const LoadingIndicator({super.key});
+  LoadingIndicator({super.key});
 
-  static final isLoading = CreateState(0);
+  final isLoading = CreateState(0);
 
-  static Future<T> show<T>(Future<T> Function() cb) async {
-    isLoading.set(isLoading.value + 1);
+  Future<T> show<T>(Future<T> Function() cb) async {
+    isLoading.value += 1;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      isLoading.notify();
+    });
     try {
       return await cb();
     } finally {

@@ -11,6 +11,8 @@ import '/widgets/table_data.dart';
 class MeterDetailsPage extends StatelessWidget {
   const MeterDetailsPage({super.key, required this.meter});
 
+  static final loadingIndicator = LoadingIndicator();
+
   final MeterInfo meter;
 
   @override
@@ -32,7 +34,7 @@ class MeterDetailsPage extends StatelessWidget {
           subtitle: Text(balance.meterNo),
         ),
         actions: [
-          const LoadingIndicator(),
+          loadingIndicator,
           IconButton(
             icon: const Padding(
               padding: .symmetric(horizontal: 10),

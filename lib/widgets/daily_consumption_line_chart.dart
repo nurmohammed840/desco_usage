@@ -149,7 +149,6 @@ class PlotLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final amountTitleInterval = computeTitleInterval(
       chartWidth: constraints.maxWidth,
       dataLength: data.length,

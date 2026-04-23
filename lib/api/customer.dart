@@ -158,7 +158,7 @@ class DailyConsumption {
   double consumedUnit;
 
   DateTime date;
-  
+
   int? sanctionLoad;
   String? tariffSolution;
 

@@ -44,6 +44,32 @@ class RechargeHistoryScreen extends StatelessWidget {
     });
   }
 
+  static void pickDate(BuildContext context) async {
+    final start = from.time();
+    final end = to.time();
+
+    final dateRange = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      initialDateRange: DateTimeRange(start: start, end: end),
+    );
+
+    if (dateRange == null) {
+      return;
+    }
+
+    if (dateRange.start == start && dateRange.end == end) {
+      return;
+    }
+
+    from = Date.from(dateRange.start);
+    to = Date.from(dateRange.end);
+
+    // if (context.mounted) loadRechargeHistorys(context, from, to);
+    if (context.mounted) loadRechargeHistorys(context, from, to);
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: appBar(
@@ -51,35 +77,13 @@ class RechargeHistoryScreen extends StatelessWidget {
       refrash: () {
         loadRechargeHistorys(context, from, to);
       },
-      actionButton: IconButton(
-        icon: const Icon(Icons.date_range),
-        tooltip: "Date range",
-        onPressed: () async {
-          final start = from.time();
-          final end = to.time();
-
-          final dateRange = await showDateRangePicker(
-            context: context,
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2100),
-            initialDateRange: DateTimeRange(start: start, end: end),
-          );
-
-          if (dateRange == null) {
-            return;
-          }
-
-          if (dateRange.start == start && dateRange.end == end) {
-            return;
-          }
-
-          from = Date.from(dateRange.start);
-          to = Date.from(dateRange.end);
-
-          // if (context.mounted) loadRechargeHistorys(context, from, to);
-          if (context.mounted) loadRechargeHistorys(context, from, to);
-        },
-      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.date_range),
+          tooltip: "Date range",
+          onPressed: () => pickDate(context),
+        ),
+      ],
     ),
     body: state.watch(
       (_) => FutureBuilder(
